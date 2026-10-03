@@ -72,7 +72,7 @@ GEMINI_API_KEY=sua_chave_api_gemini
 SECRET_KEY=chave_secreta_flask
 ```
 
-### 5. Iniciar a Aplicação
+### 5. Iniciar a Aplicação Localmente
 ```bash
 python app.py
 ```
@@ -80,5 +80,27 @@ Acesse a aplicação no navegador em: `http://localhost:5000`
 
 ---
 
+## 🌐 Hospedagem Gratuita na Nuvem (Deploy via GitHub)
+
+O projeto já está 100% configurado para hospedagem pública e gratuita no **Render** (render.com):
+
+1. Crie uma conta gratuita em [render.com](https://render.com) (faça login com sua conta do GitHub).
+2. Clique em **New +** e selecione **Web Service**.
+3. Conecte o repositório **`marcilio12/gerador_plano`**.
+4. O Render detectará automaticamente as configurações:
+   - **Runtime**: `Python`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `gunicorn app:app`
+5. Em **Environment Variables**, adicione as suas chaves:
+   - `GOOGLE_CLIENT_ID`: seu client ID do Google
+   - `GOOGLE_CLIENT_SECRET`: sua chave secreta Google
+   - `GEMINI_API_KEY`: sua chave da API do Gemini
+   - `SECRET_KEY`: uma chave de sessão segura
+6. Clique em **Create Web Service**.
+7. Pronto! Em cerca de 2 minutos, o Render fornecerá um link público seguro com HTTPS (ex.: `https://gerador-plano.onrender.com`) que qualquer pessoa poderá acessar.
+
+---
+
 ## 📄 Licença
 Desenvolvido para apoio às atividades pedagógicas do SENAI/RN.
+
