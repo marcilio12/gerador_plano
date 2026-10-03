@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Plano de Aula — SENAI Mossoró</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --senai-blue: #003399;
+            --senai-dark: #002266;
+            --senai-light: #e8eef7;
+            --bg-color: #f0f4f8;
+        }
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+        .navbar {
+            background: linear-gradient(135deg, var(--senai-blue), #0055aa);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        }
+        .user-badge {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            padding: 0.35rem 0.9rem;
+            color: #fff;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .main-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,51,153,0.08);
+            padding: 2.5rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.3rem;
+        }
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 1.5px solid #d0d7e3;
+            padding: 0.65rem 1rem;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--senai-blue);
+            box-shadow: 0 0 0 3px rgba(0,51,153,0.1);
+        }
+        .form-control[readonly] {
+            background-color: var(--senai-light);
+            color: #333;
+            font-weight: 500;
+        }
+        .btn-senai {
+            background: linear-gradient(135deg, var(--senai-blue), #0055aa);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 0.85rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .btn-senai:hover {
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,51,153,0.3);
+        }
+        .section-title {
+            color: var(--senai-blue);
+            font-weight: 700;
+            font-size: 1.15rem;
+            border-bottom: 2px solid var(--senai-light);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.2rem;
+            margin-top: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .feriados-box {
+            background: #fff8e1;
+            border: 1px solid #ffe082;
+            border-radius: 10px;
+            padding: 1rem 1.2rem;
+            margin-top: 1rem;
+            display: none;
+        }
+        .feriados-box .badge {
+            margin: 0.2rem;
+            font-size: 0.85rem;
+        }
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 99999;
+            justify-content: center;
+            align-items: center;
+        }
+        .loading-overlay.active {
+            display: flex;
+        }
+        .loading-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 20px 45px rgba(0,0,0,0.3);
+            max-width: 480px;
+            width: 90%;
+            animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes popIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+        .spin-icon {
+            display: inline-block;
+            animation: spin 2s linear infinite;
+        }
+        .file-upload-area {
+            border: 2px dashed #b0bec5;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            background: #fafbfc;
+            transition: border-color 0.2s, background 0.2s;
+            cursor: pointer;
+        }
+        .file-upload-area:hover {
+            border-color: var(--senai-blue);
+            background: #f0f4f8;
+        }
+        .file-upload-area .bi {
+            font-size: 2.2rem;
+            color: var(--senai-blue);
+        }
+        .file-name-display {
+            color: var(--senai-blue);
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        .btn-logout {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }
+        .btn-logout:hover {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+    </style>
+<body>
+    <!-- Pop-up Modal de Carregamento ao Gerar Plano -->
+    <div class="loading-overlay" id="loadingModal">
+        <div class="loading-card text-center">
+            <div class="spinner-border text-primary" style="width: 3.8rem; height: 3.8rem;" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            <h4 class="mt-3 fw-bold text-dark mb-2">Gerando Planejamento de Aulas</h4>
+            <p class="text-secondary mb-3" style="font-size: 0.95rem; line-height: 1.5;">
+                Aguarde um momento enquanto o sistema analisa o Plano de Curso, distribui os conteúdos teóricos e práticos e estrutura o cronograma pedagógico...
+            </p>
+            <div class="d-flex align-items-center justify-content-center gap-2 text-primary small fw-semibold">
+                <i class="bi bi-gear-wide-connected spin-icon"></i>
+                <span>Estruturando tópicos e ambientes pedagógicos</span>
+            </div>
+        </div>
+    </div>
+    <!-- Navbar com perfil autenticado -->
+    <nav class="navbar navbar-dark py-2">
+        <div class="container">
+            <span class="navbar-brand mb-0 h5">
+                <i class="bi bi-calendar3"></i> SENAI — Gerador de Plano de Aula
+            </span>
+            <div class="d-flex align-items-center gap-3">
+                <div class="user-badge">
+                    <i class="bi bi-person-check-fill text-warning"></i>
+                    <span>{{ user.nome or 'Docente SENAI' }}</span>
+                    <small class="opacity-75">({{ user.email }})</small>
+                </div>
+                <a href="{{ url_for('logout') }}" class="btn-logout" title="Sair do sistema">
+                    <i class="bi bi-box-arrow-right"></i> Sair
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container" style="max-width: 950px;">
+        <!-- Flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} mt-3" role="alert">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="main-card">
+            <form id="formPlano" action="{{ url_for('gerar_plano') }}" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="ativar_ia" value="true">
+
+                <!-- 1. Upload do Plano de Curso do Usuário -->
+                <div class="section-title">
+                    <i class="bi bi-file-earmark-pdf"></i> 1. Plano de Curso (PDF) — Fonte de Informações
+                </div>
+
+                <div class="file-upload-area mb-3" id="upload_area" onclick="document.getElementById('plano_curso_pdf').click()">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                    <p class="mb-1 fw-bold text-dark fs-6">Clique ou arraste o PDF do Plano de Curso</p>
+                    <small class="text-secondary">O sistema analisará o plano enviado em tempo real para preencher automaticamente o Curso, Disciplinas, Módulos, Carga Horária e Laboratórios.</small>
+                    <p class="file-name-display" id="file_name" style="display:none"></p>
+                    <div id="upload_status" class="mt-2" style="display:none;"></div>
+                    <input type="file" class="d-none" name="plano_curso_pdf" id="plano_curso_pdf" accept=".pdf">
+                </div>
+
+                <!-- 2. Dados da Disciplina -->
+                <div class="section-title">
+                    <i class="bi bi-book"></i> 2. Dados da Disciplina
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nome da disciplina / Unidade Curricular <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="nome_disciplina" id="nome_disciplina" list="lista_disciplinas" required
+                           placeholder="Digite ou selecione a disciplina do plano enviado">
+                    <datalist id="lista_disciplinas"></datalist>
+                    <small class="text-muted" id="disciplina_hint">Dica: Ao carregar o PDF acima, todas as disciplinas do plano ficam disponíveis para seleção automática.</small>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nome do(a) professor(a)</label>
+                        <input type="text" class="form-control" name="nome_professor"
+                               value="{{ user.nome or 'Marcilio Mozart de Souza Bezerra' }}"
+                               placeholder="Ex: Marcilio Mozart de Souza Bezerra">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Código da turma</label>
+                        <input type="text" class="form-control" name="codigo_turma"
+                               placeholder="Ex: TEC-ELE-107">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Curso</label>
+                        <input type="text" class="form-control" name="curso" id="curso"
+                               placeholder="Preenchido automaticamente pelo plano enviado">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Módulo</label>
+                        <input type="text" class="form-control" name="modulo" id="modulo"
+                               placeholder="Preenchido automaticamente pelo plano enviado">
+                    </div>
+                </div>
+
+                <!-- 3. Carga Horária e Previsão de Datas -->
+                <div class="section-title">
+                    <i class="bi bi-clock-history"></i> 3. Carga Horária & Calendário com Feriados de Mossoró/RN
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Carga horária total (horas) <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" name="carga_horaria" id="carga_horaria"
+                               min="1" required placeholder="Ex: 60">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Quantidade de horas por aula <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" name="horas_por_aula" id="horas_por_aula"
+                               min="1" required placeholder="Ex: 3 ou 4">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Data de início da disciplina <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" name="data_inicio" id="data_inicio" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Data final prevista</label>
+                        <input type="text" class="form-control" id="data_fim" readonly
+                               placeholder="Previsão calculada automaticamente...">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 mb-1">
+                        <span class="badge bg-primary" id="num_aulas_badge" style="display:none; font-size:0.9rem;"></span>
+                    </div>
+                </div>
+
+                <!-- Feriados Identificados -->
+                <div class="feriados-box" id="feriados_box">
+                    <h6 class="mb-2 text-dark fw-bold">
+                        <i class="bi bi-calendar-x text-warning"></i> Feriados de Mossoró/RN e Nacionais excluídos do calendário:
+                    </h6>
+                    <div id="feriados_list"></div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center mt-4 pt-2">
+                    <button type="submit" class="btn btn-senai">
+                        <i class="bi bi-magic"></i> Gerar Planejamento de Aulas
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        window.disciplinasPlano = [];
+        window.pdfEnviadoPath = null;
+
+        // Upload e Análise em Tempo Real do PDF enviado pelo usuário
+        const inputPdf = document.getElementById('plano_curso_pdf');
+        const nameEl = document.getElementById('file_name');
+        const statusEl = document.getElementById('upload_status');
+        const inputCurso = document.getElementById('curso');
+        const inputDisciplina = document.getElementById('nome_disciplina');
+        const inputModulo = document.getElementById('modulo');
+        const inputCargaHoraria = document.getElementById('carga_horaria');
+        const listaDisciplinas = document.getElementById('lista_disciplinas');
+
+        inputPdf.addEventListener('change', function() {
+            if (this.files.length === 0) {
+                nameEl.style.display = 'none';
+                statusEl.style.display = 'none';
+                return;
+            }
+
+            const file = this.files[0];
+            nameEl.textContent = '📄 Arquivo: ' + file.name;
+            nameEl.style.display = 'block';
+
+            // Feedback de carregamento
+            statusEl.innerHTML = '<div class="alert alert-info py-2 px-3 small mb-0"><div class="spinner-border spinner-border-sm text-primary me-2"></div> Analisando plano de curso enviado...</div>';
+            statusEl.style.display = 'block';
+
+            const formData = new FormData();
+            formData.append('plano_curso_pdf', file);
+
+            fetch('/analisar-plano-pdf', {
+                method: 'POST',
+                body: formData
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    window.pdfEnviadoPath = data.caminho_pdf;
+                    window.disciplinasPlano = data.disciplinas || [];
+
+                    // Preencher Curso automaticamente se detectado
+                    if (data.curso) {
+                        inputCurso.value = data.curso;
+                    }
+
+                    // Popular lista de disciplinas (datalist)
+                    listaDisciplinas.innerHTML = '';
+                    window.disciplinasPlano.forEach(d => {
+                        const opt = document.createElement('option');
+                        opt.value = d.nome;
+                        opt.label = `Módulo: ${d.modulo} | ${d.carga_horaria}h`;
+                        listaDisciplinas.appendChild(opt);
+                    });
+
+                    statusEl.innerHTML = `
+                        <div class="alert alert-success py-2 px-3 small mb-0 text-start">
+                            <i class="bi bi-check-circle-fill text-success me-1"></i>
+                            <strong>${data.curso || 'Plano de Curso'}</strong> analisado com sucesso!
+                            Encontradas <strong>${window.disciplinasPlano.length} disciplinas</strong> e laboratórios oficiais.
+                        </div>
+                    `;
+                } else {
+                    statusEl.innerHTML = `<div class="alert alert-warning py-2 px-3 small mb-0">Não foi possível extrair dados automaticamente deste PDF: ${data.error || 'formato não reconhecido'}</div>`;
+                }
+            })
+            .catch(err => {
+                console.error('Erro ao analisar PDF:', err);
+                statusEl.innerHTML = '<div class="alert alert-danger py-2 px-3 small mb-0">Erro de comunicação ao analisar o arquivo.</div>';
+            });
+        });
+
+        // Quando o usuário seleciona ou digita a disciplina
+        function atualizarDetalhesDisciplina() {
+            const discNome = inputDisciplina.value.trim();
+            if (discNome.length < 3) return;
+
+            // 1. Tentar localizar na lista em memória vinda do PDF
+            const discEncontrada = window.disciplinasPlano.find(d =>
+                d.nome.toLowerCase() === discNome.toLowerCase() ||
+                d.nome.toLowerCase().includes(discNome.toLowerCase()) ||
+                discNome.toLowerCase().includes(d.nome.toLowerCase())
+            );
+
+            if (discEncontrada) {
+                if (discEncontrada.modulo) inputModulo.value = discEncontrada.modulo;
+                if (discEncontrada.carga_horaria && discEncontrada.carga_horaria > 0) {
+                    inputCargaHoraria.value = discEncontrada.carga_horaria;
+                    calcularDataFim();
+                }
+            }
+
+            // 2. Consulta no servidor para buscar detalhes adicionais do PDF
+            fetch('/consultar-detalhes-disciplina', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    disciplina: discNome,
+                    pdf_path: window.pdfEnviadoPath
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.modulo) inputModulo.value = data.modulo;
+                    if (data.carga_horaria && data.carga_horaria > 0) {
+                        inputCargaHoraria.value = data.carga_horaria;
+                        calcularDataFim();
+                    }
+                }
+            })
+            .catch(err => console.error('Erro consulta disciplina:', err));
+        }
+
+        inputDisciplina.addEventListener('change', atualizarDetalhesDisciplina);
+        inputDisciplina.addEventListener('blur', atualizarDetalhesDisciplina);
+
+        // Auto-calculate end date & holidays
+        function calcularDataFim() {
+            const ch = document.getElementById('carga_horaria').value;
+            const ha = document.getElementById('horas_por_aula').value;
+            const di = document.getElementById('data_inicio').value;
+
+            if (!ch || !ha || !di || parseInt(ch) <= 0 || parseInt(ha) <= 0) {
+                document.getElementById('data_fim').value = '';
+                document.getElementById('num_aulas_badge').style.display = 'none';
+                document.getElementById('feriados_box').style.display = 'none';
+                return;
+            }
+
+            fetch('/calcular-data-fim', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    data_inicio: di,
+                    carga_horaria: parseInt(ch),
+                    horas_por_aula: parseInt(ha)
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.data_fim) {
+                    document.getElementById('data_fim').value = data.data_fim;
+                    const badge = document.getElementById('num_aulas_badge');
+                    badge.textContent = `📅 Total: ${data.num_aulas} aulas de ${ha}h cada`;
+                    badge.style.display = 'inline-block';
+
+                    const box = document.getElementById('feriados_box');
+                    const list = document.getElementById('feriados_list');
+                    if (data.feriados && data.feriados.length > 0) {
+                        list.innerHTML = data.feriados.map(f =>
+                            `<span class="badge bg-warning text-dark"><i class="bi bi-x-circle"></i> ${f.data} — ${f.nome}</span>`
+                        ).join(' ');
+                        box.style.display = 'block';
+                    } else {
+                        box.style.display = 'none';
+                    }
+                }
+            })
+            .catch(err => console.error('Erro no cálculo:', err));
+        }
+
+        document.getElementById('carga_horaria').addEventListener('input', calcularDataFim);
+        document.getElementById('horas_por_aula').addEventListener('input', calcularDataFim);
+        document.getElementById('data_inicio').addEventListener('change', calcularDataFim);
+
+        // Exibir pop-up modal ao enviar formulário para geração
+        const formPlano = document.getElementById('formPlano');
+        formPlano.addEventListener('submit', function() {
+            if (formPlano.checkValidity()) {
+                document.getElementById('loadingModal').classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html>

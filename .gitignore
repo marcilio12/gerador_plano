@@ -1,0 +1,28 @@
+# Ambientes virtuais e Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.env
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Arquivos temporários e logs
+*.log
+scratch/
+test_*.py
+inspect_*.py
+
+# Arquivos de saída gerados dinamicamente
+uploads/output/
+uploads/*.pdf
+uploads/*.docx
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store

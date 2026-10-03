@@ -1,0 +1,28 @@
+{
+  "Fundamentos de Eletricidade": [
+    "Laboratório de Eletrônica",
+    "Laboratório de Informática"
+  ],
+  "Fundamentos de Sistemas Elétricos": [
+    "Laboratório de Eletricidade",
+    "Laboratório de Informática"
+  ],
+  "Instalação e Manutenção Elétrica Predial": [
+    "Laboratório de Desenho",
+    "Laboratório de Informática"
+  ],
+  "Projetos Elétricos Industriais": [
+    "Laboratório de Eletrônica/Automação"
+  ],
+  "Prototipagem de Negócios Inovadores": [
+    "Sala de aula",
+    "Laboratório de desenho"
+  ],
+  "Modelagem de Projetos de Inovação": [
+    "Laboratórios para Práticas Profissionais",
+    "Laboratório de Informática"
+  ],
+  "Eficiência Energética": [
+    "Sala de Aula"
+  ]
+}

@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edição do Plano de Aula — SENAI Mossoró</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --senai-blue: #003399;
+            --senai-light: #e8eef7;
+            --bg-color: #f0f4f8;
+        }
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background: linear-gradient(135deg, var(--senai-blue), #0055aa);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        }
+        .user-badge {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            padding: 0.35rem 0.9rem;
+            color: #fff;
+            font-size: 0.88rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .main-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,51,153,0.08);
+            padding: 2rem;
+            margin-top: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+        .info-grid .info-item {
+            background: var(--senai-light);
+            border-radius: 10px;
+            padding: 0.8rem 1rem;
+        }
+        .info-grid .info-item.full-width {
+            grid-column: 1 / -1;
+        }
+        .info-label {
+            font-size: 0.8rem;
+            color: #475569;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .info-value input, .info-value textarea {
+            border: 1px solid transparent;
+            background: transparent;
+            width: 100%;
+            color: #1e293b;
+            font-size: 0.95rem;
+            outline: none;
+            border-radius: 6px;
+            padding: 0.2rem 0.4rem;
+        }
+        .info-value input:focus, .info-value textarea:focus {
+            background: #fff;
+            border-color: var(--senai-blue);
+            box-shadow: 0 0 0 2px rgba(0,51,153,0.15);
+        }
+        .section-title {
+            color: var(--senai-blue);
+            font-weight: 700;
+            font-size: 1.15rem;
+            border-bottom: 2px solid var(--senai-light);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .aulas-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .aulas-table thead th {
+            background: var(--senai-blue);
+            color: #fff;
+            padding: 0.75rem 0.6rem;
+            text-align: center;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .aulas-table thead th:first-child { border-radius: 8px 0 0 0; }
+        .aulas-table thead th:last-child { border-radius: 0 8px 0 0; }
+        .aulas-table tbody td {
+            padding: 0.45rem 0.45rem;
+            border-bottom: 1px solid #e0e6ed;
+            vertical-align: middle;
+        }
+        .aulas-table tbody tr:hover {
+            background-color: #f7faff;
+        }
+        .aulas-table .col-num { width: 45px; text-align: center; color: #888; font-weight: 700; }
+        .aulas-table .col-data { width: 80px; text-align: center; font-weight: 600; color: var(--senai-blue); }
+        .aulas-table .col-edit input {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 0.4rem 0.5rem;
+            font-size: 0.88rem;
+            background: #fff;
+            transition: border-color 0.15s;
+        }
+        .aulas-table .col-edit input:focus {
+            border-color: var(--senai-blue);
+            box-shadow: 0 0 0 2px rgba(0,51,153,0.12);
+            outline: none;
+        }
+        .btn-action {
+            border-radius: 10px;
+            padding: 0.65rem 1.4rem;
+            font-weight: 600;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .btn-action:hover { transform: translateY(-1px); }
+        .btn-pdf {
+            background: linear-gradient(135deg, #c62828, #d32f2f);
+            color: #fff;
+            border: none;
+        }
+        .btn-pdf:hover { color: #fff; box-shadow: 0 4px 16px rgba(198,40,40,0.3); }
+        .btn-docx {
+            background: linear-gradient(135deg, #0d47a1, #1565c0);
+            color: #fff;
+            border: none;
+        }
+        .btn-docx:hover { color: #fff; box-shadow: 0 4px 16px rgba(13,71,161,0.3); }
+        .btn-ia {
+            background: linear-gradient(135deg, #4a148c, #6a1b9a);
+            color: #fff;
+            border: none;
+        }
+        .btn-ia:hover { color: #fff; box-shadow: 0 4px 16px rgba(74,20,140,0.3); }
+        .actions-bar {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e6ed;
+        }
+        .table-responsive {
+            border-radius: 10px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            max-height: 70vh;
+        }
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .loading-overlay.active { display: flex; }
+        .badge-ia {
+            background: #ede7f6;
+            color: #4a148c;
+            border: 1px solid #d1c4e9;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .btn-logout {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            font-size: 0.85rem;
+            padding: 0.3rem 0.7rem;
+            border-radius: 6px;
+            transition: background 0.15s;
+        }
+        .btn-logout:hover {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+
+        /* Estilo para Impressão Direta */
+        @media print {
+            body { background: #fff; }
+            .navbar, .actions-bar, .badge-ia, .btn-action, .section-title button { display: none !important; }
+            .main-card { box-shadow: none; padding: 0; margin: 0; }
+            .table-responsive { max-height: none; overflow: visible; }
+            .aulas-table thead th { background: #003399 !important; color: #fff !important; -webkit-print-color-adjust: exact; }
+            .aulas-table .col-edit input { border: none; background: transparent; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading">
+        <div class="spinner-border text-primary" style="width: 3.5rem; height: 3.5rem;" role="status"></div>
+        <h5 class="mt-3 fw-bold text-primary" id="loading_text">Gerando documento...</h5>
+        <small class="text-muted">Aguarde um momento enquanto o arquivo é processado.</small>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark py-2">
+        <div class="container-fluid px-4">
+            <span class="navbar-brand mb-0 h5">
+                <i class="bi bi-file-earmark-text"></i> Visualização e Edição do Plano de Aula
+            </span>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge-ia" id="badge_status_ia">
+                    <i class="bi bi-stars"></i> {{ plano.status_ia }}
+                </span>
+                <div class="user-badge">
+                    <i class="bi bi-person-check-fill text-warning"></i>
+                    <span>{{ user.nome or 'Docente SENAI' }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="btn-logout" title="Sair do sistema">
+                    <i class="bi bi-box-arrow-right"></i> Sair
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4" style="max-width: 1400px;">
+        <div class="main-card">
+
+            <!-- Cabeçalho Informativo -->
+            <div class="section-title">
+                <span><i class="bi bi-card-heading"></i> Informações do Plano (Editáveis antes do download)</span>
+                <small class="text-muted fw-normal fs-6">Baseado no modelo oficial de referência do SENAI</small>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">Curso</div>
+                    <div class="info-value">
+                        <input type="text" id="edit_curso" value="{{ plano.curso }}">
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Disciplina / Unidade Curricular</div>
+                    <div class="info-value">
+                        <input type="text" id="edit_disciplina" value="{{ plano.nome_disciplina }}">
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Professor(a)</div>
+                    <div class="info-value">
+                        <input type="text" id="edit_professor" value="{{ plano.nome_professor }}">
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Código da Turma</div>
+                    <div class="info-value">
+                        <input type="text" id="edit_turma" value="{{ plano.codigo_turma }}">
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Módulo</div>
+                    <div class="info-value">
+                        <input type="text" id="edit_modulo" value="{{ plano.modulo }}">
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Carga Horária & Período Estimado</div>
+                    <div class="info-value py-1 fw-bold text-primary">
+                        {{ plano.carga_horaria }}h &nbsp;|&nbsp; De {{ plano.data_inicio_str }} até {{ plano.data_fim_str }} ({{ plano.aulas|length }} aulas)
+                    </div>
+                </div>
+                <div class="info-item full-width">
+                    <div class="info-label">Competência Geral (Objetivo Geral da UC)</div>
+                    <div class="info-value">
+                        <textarea id="edit_competencia" rows="2">{{ plano.competencia_geral }}</textarea>
+                    </div>
+                </div>
+                <div class="info-item full-width">
+                    <div class="info-label">Unidade(s) de Competência (Função da UC)</div>
+                    <div class="info-value">
+                        <textarea id="edit_uc" rows="2">{{ plano.unidade_competencia }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feriados Excluídos -->
+            {% if plano.feriados %}
+            <div class="alert alert-warning py-2 px-3 mb-3" style="border-radius:10px;">
+                <strong class="small"><i class="bi bi-calendar-x"></i> Feriados pulados no cronograma de Mossoró/RN:</strong>
+                <div class="mt-1">
+                    {% for data, nome in plano.feriados.items() %}
+                    <span class="badge bg-light text-dark border me-1">{{ data }} — {{ nome }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Tabela de Aulas -->
+            <div class="section-title">
+                <span><i class="bi bi-table"></i> Cronograma de Aulas Detalhado</span>
+                <button type="button" class="btn btn-sm btn-ia px-3" onclick="regenerarComIA()">
+                    <i class="bi bi-stars"></i> Regenerar Conteúdos com IA
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="aulas-table" id="aulas_table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Data</th>
+                            <th>Conhecimento (s)</th>
+                            <th>Estratégia de Ensino</th>
+                            <th>Recursos Didáticos</th>
+                            <th>Ambiente Pedagógico</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for aula in plano.aulas %}
+                        <tr data-index="{{ loop.index0 }}">
+                            <td class="col-num">{{ loop.index }}</td>
+                            <td class="col-data">{{ aula.data }}</td>
+                            <td class="col-edit" style="width: 36%;">
+                                <input type="text" name="conhecimento" value="{{ aula.conhecimento }}"
+                                       placeholder="Conteúdo temático da aula...">
+                            </td>
+                            <td class="col-edit" style="width: 20%;">
+                                <input type="text" name="estrategia" value="{{ aula.estrategia }}">
+                            </td>
+                            <td class="col-edit" style="width: 20%;">
+                                <input type="text" name="recursos" value="{{ aula.recursos }}">
+                            </td>
+                            <td class="col-edit" style="width: 18%;">
+                                <input type="text" name="ambiente" value="{{ aula.ambiente }}" list="lista_ambientes" placeholder="Selecione ou digite...">
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Datalist com Laboratórios Oficiais do Plano de Curso (SENAI) -->
+            <datalist id="lista_ambientes">
+                <option value="Sala de Aula">
+                <option value="Laboratório de Informática">
+                <option value="Laboratório de Instalações Elétricas Industriais">
+                <option value="Laboratório de Instalações Elétricas Prediais">
+                <option value="Laboratório de Acionamentos e Comandos Elétricos">
+                <option value="Laboratório de Automação Industrial">
+                <option value="Laboratório de Instrumentação">
+                <option value="Laboratório de Eletricidade">
+                <option value="Laboratório de Desenho">
+                <option value="Laboratório de Eficiência Energética">
+                <option value="Laboratório de Redes de Distribuição de Média e Baixa Tensão">
+                <option value="Laboratório de Energia Fotovoltaica">
+            </datalist>
+
+            <!-- Barra de Ações -->
+            <div class="actions-bar">
+                <a href="{{ url_for('index') }}" class="btn btn-action btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Voltar ao Formulário
+                </a>
+                <button type="button" class="btn btn-action btn-outline-primary" onclick="adicionarAula()">
+                    <i class="bi bi-plus-circle"></i> Adicionar Aula
+                </button>
+                <button type="button" class="btn btn-action btn-outline-danger" onclick="removerUltimaAula()">
+                    <i class="bi bi-trash"></i> Remover Última Aula
+                </button>
+
+                <div class="ms-auto d-flex gap-2">
+                    <button type="button" class="btn btn-action btn-pdf btn-lg" onclick="baixarArquivo('pdf')">
+                        <i class="bi bi-file-earmark-pdf-fill"></i> Baixar em PDF
+                    </button>
+                    <button type="button" class="btn btn-action btn-docx btn-lg" onclick="baixarArquivo('docx')">
+                        <i class="bi bi-file-earmark-word-fill"></i> Baixar em DOCX
+                    </button>
+                    <button type="button" class="btn btn-action btn-outline-dark" onclick="window.print()">
+                        <i class="bi bi-printer"></i> Imprimir
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function coletarDados() {
+            const rows = document.querySelectorAll('#aulas_table tbody tr');
+            const aulas = [];
+
+            rows.forEach((row, idx) => {
+                const inputs = row.querySelectorAll('input');
+                aulas.push({
+                    numero: idx + 1,
+                    data: row.querySelector('.col-data').textContent.trim(),
+                    conhecimento: inputs[0] ? inputs[0].value : '',
+                    estrategia: inputs[1] ? inputs[1].value : 'Aula Expositiva',
+                    recursos: inputs[2] ? inputs[2].value : 'Quadro Branco e Slides',
+                    ambiente: inputs[3] ? inputs[3].value : 'Sala de Aula'
+                });
+            });
+
+            return {
+                curso: document.getElementById('edit_curso').value,
+                nome_disciplina: document.getElementById('edit_disciplina').value,
+                nome_professor: document.getElementById('edit_professor').value,
+                codigo_turma: document.getElementById('edit_turma').value,
+                modulo: document.getElementById('edit_modulo').value,
+                competencia_geral: document.getElementById('edit_competencia').value,
+                unidade_competencia: document.getElementById('edit_uc').value,
+                aulas: aulas
+            };
+        }
+
+        function adicionarAula() {
+            const tbody = document.querySelector('#aulas_table tbody');
+            const rowCount = tbody.rows.length;
+            const newRow = tbody.insertRow();
+            newRow.setAttribute('data-index', rowCount);
+
+            newRow.innerHTML = `
+                <td class="col-num">${rowCount + 1}</td>
+                <td class="col-data">--/--</td>
+                <td class="col-edit"><input type="text" name="conhecimento" placeholder="Conteúdo da aula adicional..."></td>
+                <td class="col-edit"><input type="text" name="estrategia" value="Aula Prática de Laboratório"></td>
+                <td class="col-edit"><input type="text" name="recursos" value="Bancada Didática"></td>
+                <td class="col-edit"><input type="text" name="ambiente" value="Laboratório de Informática" list="lista_ambientes"></td>
+            `;
+        }
+
+        function removerUltimaAula() {
+            const tbody = document.querySelector('#aulas_table tbody');
+            if (tbody.rows.length > 1) {
+                if (confirm('Deseja remover a última linha de aula?')) {
+                    tbody.deleteRow(tbody.rows.length - 1);
+                }
+            }
+        }
+
+        function regenerarComIA() {
+            const disciplina = document.getElementById('edit_disciplina').value;
+            const curso = document.getElementById('edit_curso').value;
+            const rows = document.querySelectorAll('#aulas_table tbody tr');
+
+            if (!confirm(`Deseja que a IA reescreva automaticamente os conteúdos das ${rows.length} aulas de "${disciplina}" com base na pedagogia do SENAI?`)) {
+                return;
+            }
+
+            const loading = document.getElementById('loading');
+            document.getElementById('loading_text').textContent = 'Regenerando conteúdos com IA...';
+            loading.classList.add('active');
+
+            fetch('/gerar-ia-preview', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    disciplina: disciplina,
+                    curso: curso,
+                    num_aulas: rows.length
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                loading.classList.remove('active');
+                if (data.aulas && data.aulas.length > 0) {
+                    rows.forEach((row, idx) => {
+                        if (idx < data.aulas.length) {
+                            const info = data.aulas[idx];
+                            const inputs = row.querySelectorAll('input');
+                            if (inputs[0]) inputs[0].value = info.conhecimento || '';
+                            if (inputs[1]) inputs[1].value = info.estrategia || 'Aula Expositiva';
+                            if (inputs[2]) inputs[2].value = info.recursos || 'Quadro Branco e Slides';
+                            if (inputs[3]) inputs[3].value = info.ambiente || 'Sala de Aula';
+                        }
+                    });
+                }
+            })
+            .catch(err => {
+                loading.classList.remove('active');
+                alert('Erro na comunicação com a IA: ' + err.message);
+            });
+        }
+
+        function baixarArquivo(tipo) {
+            const loading = document.getElementById('loading');
+            document.getElementById('loading_text').textContent = tipo === 'pdf' ? 'Gerando PDF final...' : 'Gerando DOCX final...';
+            loading.classList.add('active');
+
+            const dados = coletarDados();
+            const endpoint = tipo === 'pdf' ? '/download-pdf' : '/download-docx';
+
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(dados)
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Falha ao gerar o documento');
+                return response.blob();
+            })
+            .then(blob => {
+                loading.classList.remove('active');
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const ext = tipo === 'pdf' ? 'pdf' : 'docx';
+                const safeName = dados.nome_disciplina.replace(/[^\w\-_]/g, '_');
+                a.download = `Plano_Aula_${safeName}.${ext}`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            })
+            .catch(err => {
+                loading.classList.remove('active');
+                alert('Erro ao baixar: ' + err.message);
+            });
+        }
+    </script>
+</body>
+</html>
